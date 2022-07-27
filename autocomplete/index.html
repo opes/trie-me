@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trie Me: Autocomplete</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 10px 20px;
+      }
+
+      main {
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+      }
+
+      section {
+        width: 50%;
+      }
+
+      ul {
+        padding: 0;
+        list-style-type: none;
+      }
+
+      input {
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        padding: 7px 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <label for="word"><h3>Autocomplete</h3></label>
+        <input id="word" name="word" list="words" />
+        <datalist id="words"></datalist>
+      </section>
+    </main>
+
+    <script type="module">
+      import { Trie, TrieNode } from '../trie.js';
+      import dictionary from '../dictionary.json' assert { type: 'json' };
+
+      const renderWordList = (words = []) => {
+        const list = document.querySelector('#words');
+
+        const items = words.map((word) => {
+          const option = document.createElement('option');
+          option.value = word;
+          return option;
+        });
+
+        list.innerHTML = '';
+        list.append(...items);
+      };
+
+      const renderOutput = (trie) => {
+        const word = document.querySelector('#word').value ?? '';
+        const results = trie.find(word.trim()) ?? [];
+        renderWordList(results);
+      };
+
+      const main = () => {
+        const trie = new Trie();
+        Object.keys(dictionary).forEach((word) => trie.insert(word));
+        renderOutput(trie);
+
+        document.querySelector('#word').addEventListener('keyup', (event) => {
+          renderOutput(trie);
+        });
+      };
+
+      main();
+    </script>
+  </body>
+</html>
