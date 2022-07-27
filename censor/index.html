@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trie Me: A Demo of Tries</title>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+        padding: 10px 20px;
+      }
+
+      main {
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      section,
+      aside {
+        width: 50%;
+      }
+
+      input[type='text'],
+      textarea {
+        border: 1px solid #ccc;
+        border-radius: 2px;
+        padding: 7px 10px;
+      }
+
+      input[type='submit'] {
+        border: 1px solid #ccc;
+        padding: 5px 10px;
+        border-radius: 2px;
+        cursor: pointer;
+      }
+
+      button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        margin-left: 5px;
+      }
+
+      output {
+        font-family: monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <section>
+        <form id="swear-form">
+          <label for="swear"><h3>Swears</h3></label>
+          <input id="swear" name="swear" type="text" />
+          <input type="submit" value="➕" />
+        </form>
+
+        <ul id="swears"></ul>
+
+        <label for="sentence"><h3>Sentence</h3></label>
+        <textarea id="sentence" name="sentence">Hello, world!</textarea>
+      </section>
+      <aside>
+        <label for="output"><h3>Output</h3></label>
+        <output id="output" name="output" for="swears sentence" />
+      </aside>
+    </main>
+
+    <script src="./index.js" type="module"></script>
+    <script type="module">
+      import { censor, Trie, TrieNode } from './index.js';
+      const trie = new Trie();
+
+      const addSwear = (event) => {
+        event.preventDefault();
+        let input = document.querySelector('#swear'),
+          swear = input.value.replace(/\s/g, '');
+
+        trie.insert(swear);
+        input.value = '';
+
+        renderSwearList();
+        renderOutput();
+      };
+
+      const removeSwear = (word) => {
+        return () => {
+          trie.remove(word);
+          renderSwearList();
+          renderOutput();
+        };
+      };
+
+      const renderSwearList = () => {
+        const items = trie.getAllWords().map((word) => {
+          const li = document.createElement('li');
+          li.textContent = word;
+
+          const deleteWordButton = document.createElement('button');
+          deleteWordButton.textContent = '❌';
+          deleteWordButton.onclick = removeSwear(word);
+
+          li.append(deleteWordButton);
+          return li;
+        });
+
+        document.querySelector('#swears').innerHTML = '';
+        document.querySelector('#swears').append(...items);
+      };
+
+      const renderOutput = () => {
+        const sentence = document.querySelector('#sentence').value;
+        const censored = censor(sentence, trie);
+
+        document.querySelector('#output').textContent = censored;
+      };
+
+      document
+        .querySelector('#swear-form')
+        .addEventListener('submit', addSwear);
+
+      document
+        .querySelector('#sentence')
+        .addEventListener('keyup', renderOutput);
+
+      const main = () => {
+        trie.insert('hello');
+        trie.insert('world');
+        renderSwearList();
+        renderOutput();
+      };
+
+      main();
+    </script>
+  </body>
+</html>
